@@ -1,10 +1,13 @@
 """
 Main Flask application with Flask-Login
 """
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 from flask_login import LoginManager
 import os
+from dotenv import load_dotenv
+
+load_dotenv()  # make sure MONGO_URI, SECRET_KEY, etc. are loaded
 
 from config import config
 from utils.db import init_db, get_db_stats
@@ -72,17 +75,37 @@ def create_app(config_name=None):
     app.register_blueprint(items_bp, url_prefix='/api')
     app.register_blueprint(ratings_bp, url_prefix='/api')
     
+    TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
     # Serve static files (HTML, CSS, JS)
     @app.route('/')
     def index():
-        return send_from_directory('.', 'index.html')
-    
-    @app.route('/<path:path>')
-    def serve_static(path):
-        """Serve static files"""
-        if os.path.exists(path):
-            return send_from_directory('.', path)
-        return send_from_directory('.', 'index.html')
+        return render_template('index.html')
+
+    @app.route('/login.html')
+    def login_page():
+        return render_template('login.html')
+
+    @app.route('/register.html')
+    def register_page():
+        return render_template('register.html')
+
+    @app.route('/home.html')
+    def home_page():
+        return render_template('home.html')
+
+    @app.route('/discover.html')
+    def discover_page():
+        return render_template('discover.html')
+
+    @app.route('/group.html')
+    def group_page():
+        # group id is passed as ?id=... in the query string; JS reads it.
+        return render_template('group.html')
+
+    @app.route('/create-group.html')
+    def create_group_page():
+        return render_template('create-group.html')
+
     
     # API root route
     @app.route('/api')
