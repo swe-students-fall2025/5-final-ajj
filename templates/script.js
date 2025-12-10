@@ -49,6 +49,39 @@ function getPageName() {
     if (path === '/' || path.endsWith('index.html')) return 'index';
     return 'unknown';
 }
+/* ======================
+   TOAST NOTIFICATIONS
+   ====================== */
+
+function getToastContainer() {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+function showToast(message, type = 'info', timeout = 4000) {
+    const container = getToastContainer();
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    // allow CSS transition to kick in
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 250);
+    }, timeout);
+}
 
 /* ======================
    MODAL FUNCTIONS (Add Item)
