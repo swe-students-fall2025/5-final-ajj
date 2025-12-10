@@ -3,6 +3,7 @@ Authentication tests with Flask-Login
 """
 import pytest
 from utils.db import users_collection
+import utils.db as db_module
 
 
 class TestRegister:
