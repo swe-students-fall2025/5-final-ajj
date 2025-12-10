@@ -1,30 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>RankIt – Frontend Preview</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RankIt - Preview</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="page landing-page">
-    <header class="page-header">
-      <h1>RankIt</h1>
-      <p>Create groups, add items, and rank what matters with your friends.</p>
-    </header>
-
-    <section class="card">
-      <h2>Get Started</h2>
-      <div class="button-row">
-        <a href="login.html" class="btn btn-primary">Log In</a>
-        <a href="register.html" class="btn btn-secondary">Register</a>
-      </div>
-
-      <p class="muted">
-        Already logged in? You’ll be redirected to <strong>My Groups</strong>.
-      </p>
-    </section>
-  </main>
+    <div class="auth-container">
+        <div class="auth-card" style="max-width: 600px;">
+            <h1>Frontend Preview</h1>
+            <p class="subtitle">Choose a page to preview</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+                <a href="login.html" class="btn btn-primary btn-block">Login Page</a>
+                <a href="register.html" class="btn btn-primary btn-block">Register Page</a>
+                <a href="home.html" class="btn btn-primary btn-block">Home Page (My Groups)</a>
+                <a href="discover.html" class="btn btn-primary btn-block">Discover Page</a>
+                <a href="create-group.html" class="btn btn-primary btn-block">Create Group Page</a>
+                <a href="group.html" class="btn btn-primary btn-block">Group View Page</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

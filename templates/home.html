@@ -1,38 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>My Groups – RankIt</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Groups - RankIt</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Top Navbar -->
-  <header class="top-nav">
-    <div class="nav-left">
-      <a href="home.html" class="logo">RankIt</a>
-    </div>
-    <div class="nav-right">
-      <span class="nav-username"></span>
-      <a href="home.html" class="nav-link">My Groups</a>
-      <a href="discover.html" class="nav-link">Discover</a>
-      <a href="create-group.html" class="nav-link">Create Group</a>
-      <a href="login.html" class="btn btn-outline btn-logout">Logout</a>
-    </div>
-  </header>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="home.html" class="logo">RankIt</a>
+            <div class="nav-links">
+                <a href="home.html">My Groups</a>
+                <a href="discover.html">Discover</a>
+                <a href="create-group.html" class="btn-create">Create Group</a>
+                <a href="login.html" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
 
-  <main class="page">
-    <header class="page-header">
-      <h1>My Groups</h1>
-      <p>Groups you’ve created or joined.</p>
-    </header>
+    <div class="container">
+        <!-- Sample success alert -->
+        <div class="alert alert-success">Welcome back! You have 3 new items to rank.</div>
 
-    <section class="card">
-      <div class="groups-grid" id="my-groups-grid">
-        <!-- Populated by script.js /initHomePage -->
-      </div>
-    </section>
-  </main>
+        <div class="page-header">
+            <h1>My Groups</h1>
+            <p>Groups you've joined and participate in</p>
+        </div>
+
+        <!-- Sample Groups -->
+        <div class="groups-grid">
+            <a href="group.html" class="group-card">
+                <h3>Best Music Albums</h3>
+                <p class="group-description">Rank your favorite albums of all time from any genre or era</p>
+                <div class="group-meta">
+                    <span class="member-count">42 members</span>
+                </div>
+            </a>
+
+            <a href="group.html" class="group-card">
+                <h3>NYU Campus Locations</h3>
+                <p class="group-description">Rate the best study spots, cafes, and hangout locations around campus</p>
+                <div class="group-meta">
+                    <span class="member-count">128 members</span>
+                </div>
+            </a>
+
+            <a href="group.html" class="group-card">
+                <h3>Best CS Courses</h3>
+                <p class="group-description">Which computer science courses are worth taking? Share your rankings</p>
+                <div class="group-meta">
+                    <span class="member-count">87 members</span>
+                </div>
+            </a>
+
+            <a href="group.html" class="group-card">
+                <h3>Top Movies 2024</h3>
+                <p class="group-description">Rate and discuss the best films released this year</p>
+                <div class="group-meta">
+                    <span class="member-count">215 members</span>
+                </div>
+            </a>
+
+            <a href="group.html" class="group-card">
+                <h3>Best Restaurants NYC</h3>
+                <p class="group-description">Discover and rank the best dining spots in New York City</p>
+                <div class="group-meta">
+                    <span class="member-count">156 members</span>
+                </div>
+            </a>
+
+            <a href="group.html" class="group-card">
+                <h3>Video Game Rankings</h3>
+                <p class="group-description">What are the greatest video games ever made? Vote now!</p>
+                <div class="group-meta">
+                    <span class="member-count">342 members</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <div class="bottom-nav">
+            <a href="discover.html" class="bottom-nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                <span>Discover</span>
+            </a>
+            <a href="create-group.html" class="bottom-nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Create Group</span>
+            </a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

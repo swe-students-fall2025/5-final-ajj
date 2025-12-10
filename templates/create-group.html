@@ -1,69 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Create Group – RankIt</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Group - RankIt</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Top Navbar -->
-  <header class="top-nav">
-    <div class="nav-left">
-      <a href="home.html" class="logo">RankIt</a>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="home.html" class="logo">RankIt</a>
+            <div class="nav-links">
+                <a href="home.html">My Groups</a>
+                <a href="discover.html">Discover</a>
+                <a href="create-group.html" class="btn-create">Create Group</a>
+                <a href="login.html" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Create a New Group</h1>
+            <p>Start your own ranking community</p>
+        </div>
+
+        <div class="form-container">
+            <form class="form-card">
+                <div class="form-group">
+                    <label for="name">Group Name</label>
+                    <input type="text" id="name" name="name" placeholder="e.g., Best Music Albums" required>
+                    <small class="form-hint">Choose a clear, descriptive name for your group</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4" placeholder="What will people rank in this group?" required></textarea>
+                    <small class="form-hint">Explain what this group is about and what gets ranked</small>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="home.html" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create Group</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="nav-right">
-      <span class="nav-username"></span>
-      <a href="home.html" class="nav-link">My Groups</a>
-      <a href="discover.html" class="nav-link">Discover</a>
-      <a href="create-group.html" class="nav-link">Create Group</a>
-      <a href="login.html" class="btn btn-outline btn-logout">Logout</a>
-    </div>
-  </header>
 
-  <main class="page">
-    <header class="page-header">
-      <h1>Create a New Group</h1>
-      <p>Give your group a name and description so others know what it’s about.</p>
-    </header>
-
-    <section class="card">
-      <form class="group-form">
-        <div class="form-group">
-          <label for="group-name">Group name</label>
-          <input
-            id="group-name"
-            name="name"
-            type="text"
-            required
-            placeholder="e.g., Best Movies of All Time"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="group-description">Description</label>
-          <textarea
-            id="group-description"
-            name="description"
-            rows="3"
-            placeholder="What is this group for?"
-          ></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="group-visibility">Visibility</label>
-          <select id="group-visibility" name="visibility">
-            <option value="public" selected>Public (anyone can find & join)</option>
-            <option value="private">Private (invite / approval only)</option>
-          </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-          Create group
-        </button>
-      </form>
-    </section>
-  </main>
+    <script src="script.js"></script>
 </body>
 </html>

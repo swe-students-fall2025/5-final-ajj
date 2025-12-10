@@ -1,51 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Log In – RankIt</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RankIt</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="page auth-page">
-    <header class="page-header">
-      <h1>Welcome back</h1>
-      <p>Log in to see your groups and rankings.</p>
-    </header>
-
-    <section class="card auth-card">
-      <form>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autocomplete="email"
-          />
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Welcome Back</h1>
+            <p class="subtitle">Sign in to continue ranking</p>
+            
+            <form>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+            </form>
+            
+            <p class="auth-footer">
+                Don't have an account? <a href="register.html">Register here</a>
+            </p>
         </div>
+    </div>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            autocomplete="current-password"
-          />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Log In</button>
-      </form>
-
-      <p class="secondary-action">
-        Don’t have an account?
-        <a href="register.html">Create one</a>.
-      </p>
-    </section>
-  </main>
+    <script src="script.js"></script>
 </body>
 </html>
