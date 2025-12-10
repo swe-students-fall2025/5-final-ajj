@@ -820,5 +820,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initDiscoverPage();
     } else if (page === 'group') {
         initGroupPage();
+    } else if (page === 'create-group') {
+        initCreateGroupPage();
     }
 });
+
