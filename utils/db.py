@@ -37,7 +37,7 @@ try:
     client = MongoClient(
         MONGO_URI,
         serverSelectionTimeoutMS=5000,
-        tlsCAFile=certifi.where(),  # 👈 use certifi's CA bundle
+        #tlsCAFile=certifi.where(),  # 👈 use certifi's CA bundle
     )
     client.admin.command("ping")
     logger.info("Connected to MongoDB successfully.")

@@ -9,7 +9,6 @@ from bson import ObjectId
 from datetime import datetime
 from bson.errors import InvalidId
 
-
 class Item:
     """Item model for things being ranked"""
     
