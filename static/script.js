@@ -774,21 +774,9 @@ async function initCreateGroupPage() {
 
         const nameInput = form.querySelector('input[name="name"], input[name="group_name"]');
         const descInput = form.querySelector('textarea[name="description"], textarea[name="group_description"]');
-        const visibilityInput = form.querySelector('select[name="visibility"], select[name="is_public"], input[name="is_public"], input[name="visibility"]');
 
         const name = nameInput ? nameInput.value.trim() : '';
         const description = descInput ? descInput.value.trim() : '';
-        let is_public = true;
-
-        if (visibilityInput) {
-            if (visibilityInput.tagName === 'SELECT') {
-                is_public = visibilityInput.value !== 'private';
-            } else if (visibilityInput.type === 'checkbox') {
-                is_public = visibilityInput.checked;
-            } else {
-                is_public = visibilityInput.value !== 'private';
-            }
-        }
 
         if (!name) {
             showToast('Please enter a group name.', 'error');
@@ -799,41 +787,32 @@ async function initCreateGroupPage() {
         try {
             const { res, data } = await apiRequest('/groups', {
                 method: 'POST',
-                body: { name, description, is_public }
+                body: { name, description }
             });
-
-            if (res.status === 401) {
-                window.location.href = 'login.html';
-                return;
-            }
 
             if (!res.ok) {
                 console.error('Create group failed:', data && data.error);
-                showToast(data && data.error ? data.error : 'Unable to create group.', 'error');
+                showToast(
+                    data && data.error ? data.error : 'Could not create group.',
+                    'error'
+                );
                 return;
             }
 
             showToast('Group created!', 'success');
+            const group = data.group || data;
 
-            const newGroupId =
-                data?.group?.id ||
-                data?.group?._id ||
-                data?.id ||
-                data?._id;
-
+            // Redirect to the new group page
             setTimeout(() => {
-                if (newGroupId) {
-                    window.location.href = `group.html?id=${newGroupId}`;
-                } else {
-                    window.location.href = 'home.html';
-                }
-            }, 800);
+                window.location.href = `group.html?id=${group.id}`;
+            }, 700);
         } catch (err) {
             console.error('Create group request failed:', err);
             showToast('Network error creating group.', 'error');
         }
     });
 }
+
 
 /* ======================
    DOMContentLoaded ROUTER

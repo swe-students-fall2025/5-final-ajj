@@ -3,166 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Best Music Albums - RankIt</title>
+    <title>Group - RankIt</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- NAVBAR GOES HERE -->
+    <!-- NAVBAR -->
     <header class="top-nav">
-    <div class="nav-left">
-        <a href="home.html" class="logo">RankIt</a>
-    </div>
-    <div class="nav-right">
-        <span class="nav-username"></span>
-        <a href="home.html" class="nav-link">My Groups</a>
-        <a href="discover.html" class="nav-link">Discover</a>
-        <a href="create-group.html" class="nav-link">Create Group</a>
-        <a href="login.html" class="btn btn-outline btn-logout">Logout</a>
-    </div>
+        <div class="nav-left">
+            <a href="home.html" class="logo">RankIt</a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-username"></span>
+            <a href="home.html" class="nav-link">My Groups</a>
+            <a href="discover.html" class="nav-link">Discover</a>
+            <a href="create-group.html" class="nav-link">Create Group</a>
+            <a href="login.html" class="btn btn-outline btn-logout">Logout</a>
+        </div>
     </header>
 
     <div class="container">
         <div class="page-header">
             <div class="header-content">
                 <div>
-                    <h1>Best Music Albums</h1>
-                    <p>Rank your favorite albums of all time from any genre or era</p>
+                    <!-- These are replaced by initGroupPage() using /api/groups/:id -->
+                    <h1>Loading group...</h1>
+                    <p>Fetching group details...</p>
                 </div>
-                <button class="btn btn-primary" onclick="showAddItemModal()">Add Item</button>
-            </div>
-        </div>
-
-        <div class="items-list">
-            <div class="item-card">
-                <div class="item-rank">1</div>
-                <div class="item-content">
-                    <h3>Dark Side of the Moon</h3>
-                    <p class="item-description">Pink Floyd - 1973</p>
-                    <div class="item-stats">
-                        <span class="score">⭐ 4.8</span>
-                        <span class="votes">156 votes</span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <div class="star-rating" data-item-id="item1">
-                        <span class="star active" data-score="1">★</span>
-                        <span class="star active" data-score="2">★</span>
-                        <span class="star active" data-score="3">★</span>
-                        <span class="star active" data-score="4">★</span>
-                        <span class="star active" data-score="5">★</span>
-                    </div>
-                    <span class="user-rating">Your rating: 5</span>
-                </div>
-            </div>
-
-            <div class="item-card">
-                <div class="item-rank">2</div>
-                <div class="item-content">
-                    <h3>Abbey Road</h3>
-                    <p class="item-description">The Beatles - 1969</p>
-                    <div class="item-stats">
-                        <span class="score">⭐ 4.7</span>
-                        <span class="votes">143 votes</span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <div class="star-rating" data-item-id="item2">
-                        <span class="star active" data-score="1">★</span>
-                        <span class="star active" data-score="2">★</span>
-                        <span class="star active" data-score="3">★</span>
-                        <span class="star active" data-score="4">★</span>
-                        <span class="star" data-score="5">★</span>
-                    </div>
-                    <span class="user-rating">Your rating: 4</span>
-                </div>
-            </div>
-
-            <div class="item-card">
-                <div class="item-rank">3</div>
-                <div class="item-content">
-                    <h3>Thriller</h3>
-                    <p class="item-description">Michael Jackson - 1982</p>
-                    <div class="item-stats">
-                        <span class="score">⭐ 4.6</span>
-                        <span class="votes">198 votes</span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <div class="star-rating" data-item-id="item3">
-                        <span class="star" data-score="1">★</span>
-                        <span class="star" data-score="2">★</span>
-                        <span class="star" data-score="3">★</span>
-                        <span class="star" data-score="4">★</span>
-                        <span class="star" data-score="5">★</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="item-card">
-                <div class="item-rank">4</div>
-                <div class="item-content">
-                    <h3>The Wall</h3>
-                    <p class="item-description">Pink Floyd - 1979</p>
-                    <div class="item-stats">
-                        <span class="score">⭐ 4.5</span>
-                        <span class="votes">112 votes</span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <div class="star-rating" data-item-id="item4">
-                        <span class="star" data-score="1">★</span>
-                        <span class="star" data-score="2">★</span>
-                        <span class="star" data-score="3">★</span>
-                        <span class="star" data-score="4">★</span>
-                        <span class="star" data-score="5">★</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="item-card">
-                <div class="item-rank">5</div>
-                <div class="item-content">
-                    <h3>Rumours</h3>
-                    <p class="item-description">Fleetwood Mac - 1977</p>
-                    <div class="item-stats">
-                        <span class="score">⭐ 4.4</span>
-                        <span class="votes">94 votes</span>
-                    </div>
-                </div>
-                <div class="item-actions">
-                    <div class="star-rating" data-item-id="item5">
-                        <span class="star active" data-score="1">★</span>
-                        <span class="star active" data-score="2">★</span>
-                        <span class="star active" data-score="3">★</span>
-                        <span class="star" data-score="4">★</span>
-                        <span class="star" data-score="5">★</span>
-                    </div>
-                    <span class="user-rating">Your rating: 3</span>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="leave-group-btn" style="display: none;">
+                        Leave Group
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Add Item Modal -->
-        <div id="addItemModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Add New Item</h2>
-                    <span class="close" onclick="closeAddItemModal()">&times;</span>
-                </div>
+        <div class="page-section">
+            <div class="section-header">
+                <h2>Leaderboard</h2>
+                <button class="btn btn-primary" onclick="openAddItemModal()">Add Item</button>
+            </div>
+
+            <!-- This list is populated entirely by initGroupPage() via /api/groups/:id/leaderboard -->
+            <div class="items-list">
+                <!-- JS adds "Loading leaderboard..." then real items -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div class="modal-backdrop" id="addItemModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Item to Group</h3>
+                <button class="modal-close" onclick="closeAddItemModal()">×</button>
+            </div>
+            <div class="modal-body">
                 <form>
                     <div class="form-group">
                         <label for="item-name">Item Name</label>
-                        <input type="text" id="item-name" name="name" placeholder="e.g., Dark Side of the Moon" required>
+                        <input type="text" id="item-name" name="name"
+                               placeholder="e.g., Dark Side of the Moon" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="item-description">Description (optional)</label>
-                        <textarea id="item-description" name="description" rows="3" placeholder="Add details..."></textarea>
+                        <textarea id="item-description" name="description"
+                                  rows="3" placeholder="Add details..."></textarea>
                     </div>
-                    
+
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeAddItemModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Item</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeAddItemModal()">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Add Item
+                        </button>
                     </div>
                 </form>
             </div>
@@ -171,4 +86,3 @@
 
     <script src="script.js"></script>
 </body>
-</html>

@@ -7,102 +7,36 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- NAVBAR GOES HERE -->
+    <!-- NAVBAR -->
     <header class="top-nav">
-    <div class="nav-left">
-        <a href="home.html" class="logo">RankIt</a>
-    </div>
-    <div class="nav-right">
-    <span class="nav-username"></span>
-        <a href="home.html" class="nav-link">My Groups</a>
-        <a href="discover.html" class="nav-link">Discover</a>
-        <a href="create-group.html" class="nav-link">Create Group</a>
-        <a href="login.html" class="btn btn-outline btn-logout">Logout</a>
-    </div>
+        <div class="nav-left">
+            <a href="home.html" class="logo">RankIt</a>
+        </div>
+        <div class="nav-right">
+            <span class="nav-username"></span>
+            <a href="home.html" class="nav-link">My Groups</a>
+            <a href="discover.html" class="nav-link">Discover</a>
+            <a href="create-group.html" class="nav-link">Create Group</a>
+            <a href="login.html" class="btn btn-outline btn-logout">Logout</a>
+        </div>
     </header>
 
     <div class="container">
         <div class="page-header">
             <h1>Discover Groups</h1>
-            <p>Find and join communities</p>
+            <p>Search public groups created by other users and join the ones you like.</p>
         </div>
 
-        <div class="search-container">
-            <form class="search-form">
-                <input type="text" name="q" placeholder="Search groups..." class="search-input">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-        </div>
+        <form class="search-form">
+            <input type="text" name="q" placeholder="Search by group name or description...">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
 
+        <!-- This grid is filled by initDiscoverPage() via /api/groups -->
         <div class="groups-grid" id="discover-groups-grid">
-            <div class="group-card">
-                <a href="group.html">
-                    <h3>Best Music Albums</h3>
-                    <p class="group-description">Rank your favorite albums of all time from any genre or era</p>
-                </a>
-                <div class="group-footer">
-                    <span class="member-count">42 members</span>
-                    <button class="btn btn-primary btn-sm" onclick="joinGroup('group1')" id="btn-group1">Join</button>
-                </div>
-            </div>
-
-            <div class="group-card">
-                <a href="group.html">
-                    <h3>Coffee Shop Reviews</h3>
-                    <p class="group-description">Find the best coffee shops based on community ratings and reviews</p>
-                </a>
-                <div class="group-footer">
-                    <span class="member-count">89 members</span>
-                    <button class="btn btn-secondary btn-sm" onclick="leaveGroup('group2')" id="btn-group2">Leave</button>
-                </div>
-            </div>
-
-            <div class="group-card">
-                <a href="group.html">
-                    <h3>Sci-Fi Books</h3>
-                    <p class="group-description">Rank the greatest science fiction novels ever written</p>
-                </a>
-                <div class="group-footer">
-                    <span class="member-count">167 members</span>
-                    <button class="btn btn-primary btn-sm" onclick="joinGroup('group3')" id="btn-group3">Join</button>
-                </div>
-            </div>
-
-            <div class="group-card">
-                <a href="group.html">
-                    <h3>TV Shows 2024</h3>
-                    <p class="group-description">What are the best TV series of this year? Cast your vote</p>
-                </a>
-                <div class="group-footer">
-                    <span class="member-count">234 members</span>
-                    <button class="btn btn-primary btn-sm" onclick="joinGroup('group4')" id="btn-group4">Join</button>
-                </div>
-            </div>
-
-            <div class="group-card">
-                <a href="group.html">
-                    <h3>Workout Routines</h3>
-                    <p class="group-description">Share and rank the most effective fitness routines and exercises</p>
-                </a>
-                <div class="group-footer">
-                    <span class="member-count">98 members</span>
-                    <button class="btn btn-secondary btn-sm" onclick="leaveGroup('group5')" id="btn-group5">Leave</button>
-                </div>
-            </div>
-
-            <div class="group-card">
-                <a href="group.html">
-                    <h3>Programming Languages</h3>
-                    <p class="group-description">Which programming language is the best? Community decides</p>
-                </a>
-                <div class="group-footer">
-                    <span class="member-count">412 members</span>
-                    <button class="btn btn-primary btn-sm" onclick="joinGroup('group6')" id="btn-group6">Join</button>
-                </div>
-            </div>
+            <!-- JS will insert “Loading groups…” and then real cards -->
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
-</html>[
