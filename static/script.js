@@ -1,5 +1,8 @@
 console.log("script.js loaded");
 
+// 🟢 NEW GLOBAL: Stores the full, unfiltered list of items fetched from the server
+let allGroupItems = []; 
+
 
 // ------------------------------------------------------
 //  AUTH HELPERS
@@ -30,22 +33,24 @@ async function logoutUser() {
 
 
 // ------------------------------------------------------
-//  PAGE INITIALIZATION ROUTER — FIXED (NO LOOPING)
+//  PAGE INITIALIZATION ROUTER
 // ------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", initPage);
 
 async function initPage() {
     const user = await getCurrentUser();
-    const path = window.location.pathname;
+    const path = window.location.pathname || "";
 
-    const isIndex    = path.endsWith("index.html") || path === "/";
-    const isLogin    = path.endsWith("login.html");
-    const isRegister = path.endsWith("register.html");
-    const isHome     = path.endsWith("home.html");
-    const isDiscover = path.endsWith("discover.html");
-    const isGroup    = path.endsWith("group.html");
-    const isCreate   = path.endsWith("create-group.html");
+    // exact matches so "create-group.html" doesn't count as a group page
+    const isIndex    = path === "/" || path.endsWith("/index.html");
+    const isLogin    = path.endsWith("/login.html") || path === "/login.html";
+    const isRegister = path.endsWith("/register.html") || path.endsWith("/register.html");
+    const isHome     = path.endsWith("/home.html") || path === "/home.html";
+    const isDiscover = path.endsWith("/discover.html") || path === "/discover.html";
+    const isGroup    = path.endsWith("/group.html") || path === "/group.html";
+    const isCreate   = path.endsWith("/create-group.html") || path === "/create-group.html";
+
 
     // If NOT logged in → block protected pages
     if (!user && (isHome || isDiscover || isGroup || isCreate)) {
@@ -85,7 +90,7 @@ async function initIndexPage() {
 
 
 // ------------------------------------------------------
-//  LOGIN PAGE — FIXED JSON BODY
+//  LOGIN PAGE
 // ------------------------------------------------------
 
 async function initLoginPage() {
@@ -117,7 +122,7 @@ async function initLoginPage() {
 
 
 // ------------------------------------------------------
-//  REGISTER PAGE — FIXED JSON BODY
+//  REGISTER PAGE
 // ------------------------------------------------------
 
 async function initRegisterPage() {
@@ -171,7 +176,10 @@ async function initHomePage() {
         return;
     }
 
-    const groups = await res.json();
+    // Backend may return either an array or { groups: [...] }
+    const data = await res.json();
+    const groups = Array.isArray(data) ? data : (data.groups || []);
+
     grid.innerHTML = "";
 
     if (!groups.length) {
@@ -186,13 +194,14 @@ async function initHomePage() {
             <h3>${g.name}</h3>
             <p>${g.description || ""}</p>
             <button class="btn btn-primary"
-                onclick="window.location.href='group.html?id=${g._id}'">
+                onclick="window.location.href='group.html?id=${g.id}'">
                 Open Group
             </button>
         `;
         grid.appendChild(card);
     }
 }
+
 
 
 
@@ -224,7 +233,15 @@ async function loadDiscover(q) {
         credentials: "include"
     });
 
-    const groups = await res.json();
+    if (!res.ok) {
+        grid.innerHTML = "<p>Failed to load groups.</p>";
+        return;
+    }
+
+    // Normalize array vs { groups: [...] }
+    const data = await res.json();
+    const groups = Array.isArray(data) ? data : (data.groups || []);
+
     grid.innerHTML = "";
 
     if (!groups.length) {
@@ -238,14 +255,18 @@ async function loadDiscover(q) {
 
         card.innerHTML = `
             <h3>${g.name}</h3>
-            <p>${g.description || ""}</p>
-            <button class="btn btn-secondary" onclick="joinGroup('${g._id}')">
-                Join Group
-            </button>
+            <p class="group-description">${g.description || ""}</p>
+            <div class="group-footer">
+                <span class="member-count">${g.member_count || 0} members</span>
+                <button class="btn btn-secondary" onclick="joinGroup('${g.id}')">
+                    Join Group
+                </button>
+            </div>
         `;
         grid.appendChild(card);
     }
 }
+
 
 async function joinGroup(groupId) {
     const res = await fetch(`/api/groups/${groupId}/join`, {
@@ -262,9 +283,85 @@ async function joinGroup(groupId) {
 }
 
 
+// ------------------------------------------------------
+//  RATING HELPERS
+// ------------------------------------------------------
+
+// Helper function to highlight stars on hover/initial load
+function highlightStars(container, score) {
+    const stars = container.querySelectorAll('.star');
+    stars.forEach(star => {
+        const starScore = parseInt(star.dataset.score);
+        // Using ★ and ☆ is a common technique for simple star ratings
+        star.textContent = (starScore <= score) ? '★' : '☆'; 
+    });
+}
+
+// Helper function to create the star elements
+function renderRatingStars(itemId, currentScore = 0) {
+    const starContainer = document.createElement("div");
+    starContainer.className = "rating-stars";
+    starContainer.dataset.itemId = itemId;
+
+    for (let i = 1; i <= 5; i++) {
+        const star = document.createElement("span");
+        star.classList.add("star");
+        star.dataset.score = i;
+
+        // Attach the click handler to submit the rating
+        star.addEventListener('click', () => submitRating(itemId, i));
+        
+        // Add hover effects for better UX
+        star.addEventListener('mouseover', () => highlightStars(starContainer, i));
+        // On mouseout, revert to the current score display
+        star.addEventListener('mouseout', () => highlightStars(starContainer, currentScore));
+
+        starContainer.appendChild(star);
+    }
+    
+    // Initial display based on the current score
+    highlightStars(starContainer, currentScore);
+    
+    return starContainer;
+}
 
 // ------------------------------------------------------
-//  GROUP PAGE
+//  RATING SUBMISSION
+// ------------------------------------------------------
+
+async function submitRating(itemId, score) {
+    const params = new URLSearchParams(window.location.search);
+    const groupId = params.get("id");
+
+    try {
+        const res = await fetch(`/api/items/${itemId}/rate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ score })
+        });
+
+        if (res.ok) {
+            // Rating submitted successfully - no alert needed, as the list will refresh
+            
+            // Re-load the leaderboard to show updated average and your new rating
+            if (groupId) {
+                // Fetch new data and re-apply filters (which handles the display)
+                loadLeaderboard(groupId); 
+            }
+        } else {
+            const data = await res.json();
+            alert(`Failed to submit rating: ${data.error || res.statusText}`);
+        }
+    } catch (error) {
+        console.error("Error submitting rating:", error);
+        alert("An unknown network error occurred while submitting rating.");
+    }
+}
+
+
+// ------------------------------------------------------
+//  GROUP PAGE (LEADERBOARD/FILTERING LOGIC)
 // ------------------------------------------------------
 
 async function initGroupPage() {
@@ -272,12 +369,18 @@ async function initGroupPage() {
     const id = params.get("id");
 
     if (!id) {
-        alert("Group ID missing.");
+        console.warn("Group page opened without id; redirecting to home.");
+        window.location.href = "home.html";
         return;
     }
 
     loadGroupInfo(id);
-    loadLeaderboard(id);
+    
+    // 🟢 NEW: Attach listeners for filters and search
+    document.getElementById("item-search")?.addEventListener('input', applyFiltersAndSearch);
+    document.getElementById("my-rated-filter")?.addEventListener('change', applyFiltersAndSearch);
+
+    loadLeaderboard(id); // Initial load of items
 
     const leaveBtn = document.getElementById("leave-group-btn");
     if (leaveBtn) {
@@ -300,9 +403,13 @@ async function initGroupPage() {
 
             if (res.ok) {
                 closeAddItemModal();
-                loadLeaderboard(id);
+                await loadLeaderboard(id); // Refresh the list
+                // Clear the form inputs after successful submission
+                form.querySelector("#item-name").value = "";
+                form.querySelector("#item-description").value = "";
             } else {
-                alert("Failed to add item.");
+                const data = await res.json();
+                alert(data.error || "Failed to add item.");
             }
         });
     }
@@ -322,27 +429,100 @@ async function loadGroupInfo(id) {
     if (desc)   desc.textContent   = data.description || "";
 }
 
+
 async function loadLeaderboard(id) {
-    const list = document.querySelector(".items-list");
+    const list = document.querySelector(".items-list"); 
+    if (!list) return; 
+    
     list.innerHTML = "<p>Loading leaderboard...</p>";
 
     const res = await fetch(`/api/groups/${id}/leaderboard`, {
         credentials: "include"
     });
+    
+    if (!res.ok) {
+        list.innerHTML = "<p>Failed to load items.</p>";
+        return;
+    }
 
-    const items = await res.json();
-    list.innerHTML = "";
+    const data = await res.json();
+    
+    // 🟢 CRITICAL: Store the full list globally for filtering
+    allGroupItems = data.leaderboard || []; 
+    
+    // Pass the items to the function that filters and renders them
+    applyFiltersAndSearch(); 
+}
 
+
+function applyFiltersAndSearch() {
+    const searchInput = document.getElementById("item-search");
+    const filterInput = document.getElementById("my-rated-filter");
+    
+    // Default to empty string if element not found
+    const query = searchInput?.value.toLowerCase() || ''; 
+    const showRated = filterInput?.checked || false;
+    
+    let filteredItems = allGroupItems;
+
+    // 1. Apply Search Filter
+    if (query) {
+        filteredItems = filteredItems.filter(item => 
+            item.name.toLowerCase().includes(query) || 
+            item.description.toLowerCase().includes(query)
+        );
+    }
+
+    // 2. Apply Rated Filter
+    if (showRated) {
+        // user_rating is null (or 0) if not rated. In Python it's null/None.
+        // We look for any non-null (i.e., non-zero) rating
+        filteredItems = filteredItems.filter(item => item.user_rating && item.user_rating > 0);
+    }
+    
+    // 3. Render the final list
+    renderItemList(filteredItems);
+}
+
+
+function renderItemList(items) {
+    const list = document.querySelector(".items-list"); 
+    list.innerHTML = ""; // Clear existing list
+
+    if (items.length === 0) {
+        list.innerHTML = "<p>No items match your criteria.</p>";
+        return;
+    }
+    
     for (const item of items) {
         const div = document.createElement("div");
         div.className = "item-card";
+        
+        // 🟢 NEW: Enhanced Item Card HTML structure
         div.innerHTML = `
-            <h4>${item.name}</h4>
-            <p>Score: ${item.avg_rating?.toFixed(2) || "N/A"}</p>
+            <div class="item-rank-score">
+                <span class="rank-number">#${item.rank}</span>
+                <span class="item-name-text">${item.name}</span>
+            </div>
+            <p class="item-description">${item.description || "No description provided"}</p>
+            <div class="item-stats">
+                <span class="avg-score">Avg Score: 
+                    <strong>${item.avg_rating?.toFixed(2) || "N/A"}</strong>
+                </span>
+                <span class="rating-count">(${item.rating_count} ratings)</span>
+                </div>
         `;
+        
+        // Render the stars and append the container
+        // item.user_rating will be null or the score (1-5)
+        const userRating = item.user_rating || 0; 
+        const starContainer = renderRatingStars(item.id, userRating);
+        div.querySelector('.item-stats').appendChild(starContainer);
+        
         list.appendChild(div);
     }
 }
+
 
 async function leaveGroup(id) {
     const res = await fetch(`/api/groups/${id}/leave`, {
@@ -401,5 +581,3 @@ async function initCreateGroupPage() {
         }
     });
 }
-
-

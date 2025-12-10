@@ -1,3 +1,5 @@
+# routes/groups.py
+
 """
 Group routes matching frontend pages
 """
@@ -7,6 +9,33 @@ from models.group import Group
 from utils.validators import sanitize_input
 
 groups_bp = Blueprint('groups', __name__)
+
+
+# 🟢 NEW: Route for the Discover page to get ALL groups
+@groups_bp.route('/groups', methods=['GET'])
+def get_all_groups():
+    """
+    Get all groups (for Discover page)
+    
+    Frontend: discover.html
+    Request: GET /api/groups
+    """
+    try:
+        # Fetch all groups (or paginated/searched list)
+        groups = Group.get_all(search=request.args.get('q')) 
+        
+        # Get user ID to check membership/admin status for the current user.
+        # This works correctly even if current_user is not authenticated (anonymous user).
+        user_id = current_user.id if current_user.is_authenticated else None
+        
+        # Serialize groups, passing user_id to to_dict
+        result = [Group.to_dict(g, user_id) for g in groups]
+        
+        return jsonify({'groups': result}), 200
+        
+    except Exception as e:
+        print(f"Get all groups error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
 
 
 @groups_bp.route('/groups', methods=['POST'])
@@ -35,8 +64,9 @@ def create_group():
         # Create group
         group = Group.create(name, description, current_user.id)
         
-        # Add to user's groups
-        current_user.update_groups(str(group['_id']), 'add')
+        # Add to user's groups (this relies on the User model being correctly defined)
+        # Assuming current_user is an instance of the User model with update_groups method
+        current_user.update_groups(str(group['_id']), 'add') 
         
         return jsonify({
             'message': 'Group created successfully',
@@ -45,37 +75,6 @@ def create_group():
         
     except Exception as e:
         print(f"Create group error: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-
-@groups_bp.route('/groups', methods=['GET'])
-def get_groups():
-    """
-    Get all groups (discover page)
-    
-    Frontend: discover.html
-    Request: GET /api/groups?q=search&page=1
-    """
-    try:
-        search = request.args.get('q', '').strip()
-        page = int(request.args.get('page', 1))
-        limit = 20
-        skip = (page - 1) * limit
-        
-        groups = Group.get_all(search, skip, limit)
-        
-        user_id = current_user.id if current_user.is_authenticated else None
-        
-        result = [Group.to_dict(g, user_id) for g in groups]
-        
-        return jsonify({
-            'groups': result,
-            'page': page,
-            'has_more': len(result) == limit
-        }), 200
-        
-    except Exception as e:
-        print(f"Get groups error: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -93,13 +92,42 @@ def get_group(group_id):
         if not group:
             return jsonify({'error': 'Group not found'}), 404
         
+        # Pass user ID if authenticated, or None otherwise
         user_id = current_user.id if current_user.is_authenticated else None
         
-        return jsonify({'group': Group.to_dict(group, user_id)}), 200
+        return jsonify(Group.to_dict(group, user_id)), 200
         
     except Exception as e:
         print(f"Get group error: {e}")
         return jsonify({'error': 'Invalid group ID'}), 400
+
+
+# 🟢 Delete group route (Creator Only)
+@groups_bp.route('/groups/<group_id>', methods=['DELETE'])
+@login_required
+def delete_group(group_id):
+    """
+    Delete group (CREATOR ONLY)
+    
+    Request: DELETE /api/groups/:id
+    """
+    try:
+        group = Group.find_by_id(group_id)
+        if not group:
+            return jsonify({'error': 'Group not found'}), 404
+        
+        # CRITICAL CHECK: Must be the original creator
+        if str(group['created_by']) != current_user.id:
+            return jsonify({'error': 'Only the group creator can delete the group'}), 403
+            
+        # Delete group, items, and ratings
+        Group.delete(group_id) 
+        
+        return jsonify({'message': 'Group and all associated data deleted successfully'}), 200
+        
+    except Exception as e:
+        print(f"Delete group error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
 
 
 @groups_bp.route('/groups/<group_id>/join', methods=['POST'])
@@ -107,15 +135,8 @@ def get_group(group_id):
 def join_group(group_id):
     """
     Join a group
-    
-    Frontend: discover.html (Join button)
-    Request: POST /api/groups/:id/join
     """
     try:
-        group = Group.find_by_id(group_id)
-        if not group:
-            return jsonify({'error': 'Group not found'}), 404
-        
         if Group.is_member(group_id, current_user.id):
             return jsonify({'error': 'Already a member'}), 400
         
@@ -134,9 +155,6 @@ def join_group(group_id):
 def leave_group(group_id):
     """
     Leave a group
-    
-    Frontend: discover.html (Leave button)
-    Request: POST /api/groups/:id/leave
     """
     try:
         if not Group.is_member(group_id, current_user.id):
@@ -148,7 +166,8 @@ def leave_group(group_id):
         return jsonify({'message': 'Left group successfully'}), 200
         
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        # Handles the 'creator cannot leave' error from the model
+        return jsonify({'error': str(e)}), 403
     except Exception as e:
         print(f"Leave group error: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -159,9 +178,6 @@ def leave_group(group_id):
 def get_my_groups():
     """
     Get user's groups
-    
-    Frontend: home.html
-    Request: GET /api/me/groups
     """
     try:
         groups = Group.get_user_groups(current_user.id)

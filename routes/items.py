@@ -7,6 +7,8 @@ from models.item import Item
 from models.group import Group
 from models.rating import Rating
 from utils.validators import sanitize_input
+from models.rating import Rating # 🟢 ADD THIS
+from utils.validators import validate_rating # 🟢 ADD THIS
 
 items_bp = Blueprint('items', __name__)
 
@@ -44,8 +46,9 @@ def add_item(group_id):
         }), 201
         
     except Exception as e:
-        print(f"Add item error: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+        # 🟢 TEMPORARY DEBUGGING STEP: Return the actual error message
+        print(f"Add item error: {e}") 
+        return jsonify({'error': f'Internal server error: {e}'}), 500
 
 
 @items_bp.route('/groups/<group_id>/items', methods=['GET'])
@@ -133,4 +136,57 @@ def delete_item(item_id):
         
     except Exception as e:
         print(f"Delete item error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+# In routes/items.py (Add this new function)
+@items_bp.route('/items/<item_id>/rate', methods=['POST']) # The route is now in items_bp
+@login_required
+def rate_item(item_id):
+    """
+    Rate an item (1-5 stars)
+
+    Frontend: group.html (star rating click)
+    Request: POST /api/items/:id/rate
+    Body: {score: 1-5}
+    """
+    try:
+        data = request.get_json()
+        score = data.get('score')
+
+        # Validate score
+        if not validate_rating(score):
+            return jsonify({'error': 'Rating must be between 1 and 5'}), 400
+
+        score = int(score)
+
+        # Get item
+        item = Item.find_by_id(item_id)
+        if not item:
+            return jsonify({'error': 'Item not found'}), 404
+
+        group_id = str(item['group_id'])
+
+        # Check membership (still necessary)
+        if not Group.is_member(group_id, current_user.id):
+            return jsonify({'error': 'Must be a group member to rate items'}), 403
+
+        # Create or update rating
+        old_score, new_score = Rating.create_or_update(
+            current_user.id, group_id, item_id, score
+        )
+
+        # Update item's overall stats
+        Item.update_rating_stats(item_id, old_score, new_score)
+
+        # Return updated item
+        updated_item = Item.find_by_id(item_id)
+        user_rating = Rating.get_user_rating(current_user.id, item_id)
+
+        return jsonify({
+            'message': 'Rating submitted successfully',
+            'item': Item.to_dict(updated_item, user_rating)
+        }), 200
+
+    except Exception as e:
+        print(f"Rate item error: {e}")
         return jsonify({'error': 'Internal server error'}), 500

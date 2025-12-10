@@ -1,9 +1,13 @@
+# models/item.py
+
 """
 Item model - things that get ranked in groups
 """
-from utils.db import items_collection
+# 🟢 FIX: Import utils.db as a module to resolve import order issues.
+import utils.db 
 from bson import ObjectId
 from datetime import datetime
+from bson.errors import InvalidId
 
 
 class Item:
@@ -13,116 +17,110 @@ class Item:
     def create(group_id, name, description, added_by_id):
         """
         Create new item in a group
-        
-        Args:
-            group_id (str): Group ID
-            name (str): Item name
-            description (str): Item description (optional)
-            added_by_id (str): User ID who added it
-            
-        Returns:
-            dict: Created item document
         """
-        item = {
-            'group_id': ObjectId(group_id),
-            'name': name,
-            'description': description or '',
-            'added_by': ObjectId(added_by_id),
-            'created_at': datetime.utcnow(),
-            'rating_count': 0,
-            'rating_sum': 0,
-            'avg_rating': 0.0
-        }
-        
-        result = items_collection.insert_one(item)
-        item['_id'] = result.inserted_id
-        return item
+        try:
+            item = {
+                'group_id': ObjectId(group_id),
+                'name': name,
+                'description': description or '',
+                'added_by': ObjectId(added_by_id),
+                'created_at': datetime.utcnow(),
+                'rating_count': 0,
+                'rating_sum': 0,
+                'avg_rating': 0.0
+            }
+            
+            # 🟢 FIX: Access collection via module namespace (guaranteed to work)
+            result = utils.db.items_collection.insert_one(item) 
+            item['_id'] = result.inserted_id
+            return item
+        except InvalidId as e:
+            raise ValueError(f"Invalid ID format provided for item creation: {e}")
     
     @staticmethod
     def find_by_id(item_id):
         """Find item by ID"""
-        return items_collection.find_one({'_id': ObjectId(item_id)})
+        try:
+            # 🟢 FIX: Access collection via module namespace
+            return utils.db.items_collection.find_one({'_id': ObjectId(item_id)})
+        except InvalidId:
+            return None
     
     @staticmethod
     def get_by_group(group_id, sort='rating'):
         """
         Get all items in a group
-        
-        Args:
-            group_id (str): Group ID
-            sort (str): Sort method - 'rating' (default), 'new', 'name'
-            
-        Returns:
-            list: List of items
         """
-        query = {'group_id': ObjectId(group_id)}
-        
-        # Sort options
-        sort_options = {
-            'rating': [('avg_rating', -1), ('rating_count', -1)],  # Best rated first
-            'new': [('created_at', -1)],  # Newest first
-            'name': [('name', 1)]  # Alphabetical
-        }
-        
-        sort_by = sort_options.get(sort, sort_options['rating'])
-        
-        return list(items_collection.find(query).sort(sort_by))
-    
+        try:
+            query = {'group_id': ObjectId(group_id)}
+            sort_field = 'avg_rating' if sort == 'rating' else 'created_at'
+            sort_direction = -1
+            
+            # 🟢 FIX: Access collection via module namespace
+            return list(utils.db.items_collection.find(query).sort([
+                (sort_field, sort_direction),
+                ('rating_count', -1)
+            ]))
+        except InvalidId:
+            return []
+
     @staticmethod
     def delete(item_id):
-        """Delete item (admin only)"""
-        result = items_collection.delete_one({'_id': ObjectId(item_id)})
-        return result.deleted_count > 0
-    
+        """Delete item by ID"""
+        try:
+            # 🟢 FIX: Access collection via module namespace
+            return utils.db.items_collection.delete_one({'_id': ObjectId(item_id)}).deleted_count > 0
+        except InvalidId:
+            return False
+
     @staticmethod
-    def update_rating_stats(item_id, new_rating, old_rating=None):
+    def update_rating_stats(item_id, old_rating, new_rating):
         """
-        Update item's rating statistics after a rating is added/changed
-        
-        Args:
-            item_id (str): Item ID
-            new_rating (int): New rating value (1-5)
-            old_rating (int, optional): Previous rating value if updating
+        Update item rating stats after a rating is created or updated.
         """
-        if old_rating is None:
-            # New rating - increment count and add to sum
-            items_collection.update_one(
-                {'_id': ObjectId(item_id)},
-                {
-                    '$inc': {
-                        'rating_count': 1,
-                        'rating_sum': new_rating
-                    }
-                }
-            )
-        else:
-            # Update existing rating - adjust sum only
-            diff = new_rating - old_rating
-            items_collection.update_one(
-                {'_id': ObjectId(item_id)},
-                {'$inc': {'rating_sum': diff}}
-            )
-        
-        # Recalculate average
-        item = items_collection.find_one({'_id': ObjectId(item_id)})
-        if item and item['rating_count'] > 0:
-            avg = item['rating_sum'] / item['rating_count']
-            items_collection.update_one(
-                {'_id': ObjectId(item_id)},
-                {'$set': {'avg_rating': round(avg, 2)}}
-            )
+        try:
+            # Determine update operation
+            update_op = {}
+            if old_rating is None:
+                # New rating added
+                update_op = {'$inc': {'rating_count': 1, 'rating_sum': new_rating}}
+            else:
+                # Update existing rating - adjust sum only
+                diff = new_rating - old_rating
+                update_op = {'$inc': {'rating_sum': diff}}
+            
+            # Perform the update
+            if update_op:
+                utils.db.items_collection.update_one(
+                    {'_id': ObjectId(item_id)},
+                    update_op
+                )
+            
+            # Recalculate average
+            item = utils.db.items_collection.find_one({'_id': ObjectId(item_id)})
+            if item and item.get('rating_count', 0) > 0:
+                rating_sum = item.get('rating_sum', 0)
+                rating_count = item.get('rating_count', 0)
+                
+                if rating_count > 0:
+                    avg = rating_sum / rating_count
+                    utils.db.items_collection.update_one(
+                        {'_id': ObjectId(item_id)},
+                        {'$set': {'avg_rating': round(avg, 2)}}
+                    )
+                else: 
+                     utils.db.items_collection.update_one(
+                        {'_id': ObjectId(item_id)},
+                        {'$set': {'avg_rating': 0.0}}
+                    )
+
+        except InvalidId:
+            pass
     
     @staticmethod
     def to_dict(item, user_rating=None):
         """
         Convert item to dictionary for API responses
-        
-        Args:
-            item (dict): Item document
-            user_rating (dict, optional): User's rating for this item
-            
-        Returns:
-            dict: Formatted item data
         """
         return {
             'id': str(item['_id']),

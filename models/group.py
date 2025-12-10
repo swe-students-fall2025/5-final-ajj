@@ -1,3 +1,5 @@
+# models/group.py
+
 """
 Group model - simplified to match frontend
 """
@@ -55,48 +57,49 @@ class Group:
             list: List of group documents
         """
         query = {}
-        
         if search:
-            query['$or'] = [
-                {'name': {'$regex': search, '$options': 'i'}},
-                {'description': {'$regex': search, '$options': 'i'}}
-            ]
+            query['name'] = {'$regex': search, '$options': 'i'}
         
-        return list(
-            groups_collection
-            .find(query)
-            .sort('created_at', -1)
-            .skip(skip)
-            .limit(limit)
-        )
-    
+        # NOTE: .skip().limit() only works reliably if the collection is indexed
+        return list(groups_collection.find(query).skip(skip).limit(limit))
+
+    # ==========================================================
+    # 🐛 FIX: MISSING FUNCTION ADDED HERE
+    # ==========================================================
     @staticmethod
     def get_user_groups(user_id):
-        """Get groups user is a member of"""
-        return list(
-            groups_collection
-            .find({'members': ObjectId(user_id)})
-            .sort('created_at', -1)
-        )
+        """
+        Get all groups a user is a member of
+        
+        Args:
+            user_id (str): ID of the user
+            
+        Returns:
+            list: List of group documents
+        """
+        # Finds all groups where the 'members' array contains the user's ObjectId
+        # The .find() returns a Cursor, which is converted to a list for iteration
+        return list(groups_collection.find({'members': ObjectId(user_id)}))
+    # ==========================================================
     
     @staticmethod
     def is_member(group_id, user_id):
-        """Check if user is member"""
-        group = groups_collection.find_one({
+        """Check if user is a member of the group"""
+        count = groups_collection.count_documents({
             '_id': ObjectId(group_id),
             'members': ObjectId(user_id)
         })
-        return group is not None
-    
+        return count > 0
+
     @staticmethod
     def is_admin(group_id, user_id):
-        """Check if user is admin"""
-        group = groups_collection.find_one({
+        """Check if user is an admin of the group"""
+        count = groups_collection.count_documents({
             '_id': ObjectId(group_id),
             'admins': ObjectId(user_id)
         })
-        return group is not None
-    
+        return count > 0
+
     @staticmethod
     def add_member(group_id, user_id):
         """Add member to group"""
@@ -140,5 +143,5 @@ class Group:
         if user_id:
             group_dict['is_member'] = ObjectId(user_id) in group.get('members', [])
             group_dict['is_admin'] = ObjectId(user_id) in group.get('admins', [])
-        
+            
         return group_dict
