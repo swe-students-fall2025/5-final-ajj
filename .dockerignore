@@ -1,0 +1,16 @@
+__pycache__
+build
+.git
+.github
+.gitignore
+.env
+.env.*
+*.log
+.DS_Store
+docker-compose.yml
+Dockerfile
+.dockerignore
+tests/
+*.md
+Pipfile
+Pipfile.lock
