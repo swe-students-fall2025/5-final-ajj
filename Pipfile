@@ -11,6 +11,8 @@ python-dotenv = "*"
 flask-cors = "*"
 bcrypt = "*"
 certifi = "*"
+pytest = "*"
+coverage = "*"
 
 [dev-packages]
 pytest = "*"
