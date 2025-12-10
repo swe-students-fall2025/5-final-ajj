@@ -1,17 +1,19 @@
 """
 Main Flask application with Flask-Login
 """
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required, current_user
 import os
 from dotenv import load_dotenv
 
 load_dotenv()  # make sure MONGO_URI, SECRET_KEY, etc. are loaded
 
 from config import config
-from utils.db import init_db, get_db_stats
+from utils.db import db, init_db, get_db_stats
 from models.user import User
+from models.group import Group
+from models.item import Item
 
 # Import blueprints
 from routes.auth import auth_bp
@@ -105,7 +107,7 @@ def create_app(config_name=None):
     @app.route('/create-group.html')
     def create_group_page():
         return render_template('create-group.html')
-
+    
     
     # API root route
     @app.route('/api')
