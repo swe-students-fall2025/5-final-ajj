@@ -10,6 +10,7 @@ pymongo = "*"
 python-dotenv = "*"
 flask-cors = "*"
 bcrypt = "*"
+certifi = "*"
 
 [dev-packages]
 pytest = "*"

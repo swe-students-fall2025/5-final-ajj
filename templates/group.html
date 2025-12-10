@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- NAVBAR -->
     <header class="top-nav">
         <div class="nav-left">
             <a href="home.html" class="logo">RankIt</a>
@@ -25,7 +24,6 @@
         <div class="page-header">
             <div class="header-content">
                 <div>
-                    <!-- These are replaced by initGroupPage() using /api/groups/:id -->
                     <h1>Loading group...</h1>
                     <p>Fetching group details...</p>
                 </div>
@@ -43,19 +41,16 @@
                 <button class="btn btn-primary" onclick="openAddItemModal()">Add Item</button>
             </div>
 
-            <!-- This list is populated entirely by initGroupPage() via /api/groups/:id/leaderboard -->
             <div class="items-list">
-                <!-- JS adds "Loading leaderboard..." then real items -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Add Item Modal -->
-    <div class="modal-backdrop" id="addItemModal" style="display: none;">
-        <div class="modal">
+    <div class="modal" id="addItemModal" style="display: none;">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3>Add Item to Group</h3>
-                <button class="modal-close" onclick="closeAddItemModal()">×</button>
+                <button class="close" onclick="closeAddItemModal()">×</button>
             </div>
             <div class="modal-body">
                 <form>
@@ -86,3 +81,4 @@
 
     <script src="script.js"></script>
 </body>
+</html>

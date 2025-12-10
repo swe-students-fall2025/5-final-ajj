@@ -28,9 +28,15 @@
         </div>
 
         <form class="search-form">
-            <input type="text" name="q" placeholder="Search by group name or description...">
+            <input
+                type="text"
+                name="q"
+                class="search-input"
+                placeholder="Search groups by name or description..."
+            >
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
+        
 
         <!-- This grid is filled by initDiscoverPage() via /api/groups -->
         <div class="groups-grid" id="discover-groups-grid">
