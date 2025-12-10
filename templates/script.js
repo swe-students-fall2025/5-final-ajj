@@ -613,6 +613,87 @@ function initDiscoverPage() {
     loadGroups('');
 }
 
+async function initCreateGroupPage() {
+    const form = document.querySelector('form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const nameInput = form.querySelector('input[name="name"], input[name="group_name"]');
+        const descInput = form.querySelector('textarea[name="description"], textarea[name="group_description"]');
+        const visibilityInput = form.querySelector('select[name="visibility"], select[name="is_public"], input[name="is_public"], input[name="visibility"]');
+
+        const name = nameInput ? nameInput.value.trim() : '';
+        const description = descInput ? descInput.value.trim() : '';
+
+        // default: public
+        let is_public = true;
+        if (visibilityInput) {
+            if (visibilityInput.tagName === 'SELECT') {
+                // value 'private' or 'public'
+                is_public = visibilityInput.value !== 'private';
+            } else if (visibilityInput.type === 'checkbox') {
+                // checked = public (or private, depending on your UI)
+                is_public = visibilityInput.checked;
+            } else {
+                // plain input with 'public' / 'private'
+                is_public = visibilityInput.value !== 'private';
+            }
+        }
+
+        if (!name) {
+            showToast('Please enter a group name.', 'error');
+            if (nameInput) nameInput.focus();
+            return;
+        }
+
+        try {
+            const { res, data } = await apiRequest('/groups', {
+                method: 'POST',
+                body: {
+                    name,
+                    description,
+                    is_public
+                }
+            });
+
+            if (res.status === 401) {
+                // not logged in
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (!res.ok) {
+                console.error('Create group failed:', data && data.error);
+                showToast(data && data.error ? data.error : 'Unable to create group.', 'error');
+                return;
+            }
+
+            showToast('Group created!', 'success');
+
+            // backend might return {id: ..., ...} or {group: {id: ...}}
+            const newGroupId =
+                data?.id ||
+                data?.group?.id ||
+                data?.group?._id ||
+                data?._id;
+
+            // a tiny delay so the user sees the toast
+            setTimeout(() => {
+                if (newGroupId) {
+                    window.location.href = `group.html?id=${newGroupId}`;
+                } else {
+                    window.location.href = 'home.html';
+                }
+            }, 800);
+        } catch (err) {
+            console.error('Create group request failed:', err);
+            showToast('Network error creating group. Please try again.', 'error');
+        }
+    });
+}
+
 async function initGroupPage() {
     const params = new URLSearchParams(window.location.search);
     const groupId = params.get('id') || params.get('groupId');
