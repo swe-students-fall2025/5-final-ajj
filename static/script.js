@@ -33,6 +33,18 @@ async function apiRequest(path, options = {}) {
     }
     return { res, data };
 }
+async function getCurrentUser() {
+  try {
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    if (res.status === 200) {
+      return await res.json();
+    }
+    return null;
+  } catch (err) {
+    console.error('Error checking auth:', err);
+    return null;
+  }
+}
 
 /**
  * Page name detector based on pathname.
@@ -505,49 +517,42 @@ function createLeaderboardItemCard(item) {
 
 // INDEX PAGE (simple redirect based on auth)
 async function initIndexPage() {
-    const authed = await isAuthenticated();
-    if (authed) {
-        window.location.href = 'home.html';
-    } else {
-        // stay on index; it just shows preview links
-    }
+  const user = await getCurrentUser();
+  if (user) {
+    window.location.href = 'home.html';
+  }
 }
 
-// LOGIN
-function initLoginPage() {
-    const form = document.querySelector('form');
-    if (!form) return;
+async function initLoginPage() {
+  const user = await getCurrentUser();
+  if (user) {
+    window.location.href = 'home.html';
+    return;
+  }
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = form.querySelector('input[name="email"]')?.value.trim();
-        const password = form.querySelector('input[name="password"]')?.value.trim();
+  const form = document.querySelector('form');
+  if (!form) return;
 
-        if (!email || !password) {
-            showToast('Please enter your email and password.', 'error');
-            return;
-        }
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = form.querySelector('input[name="email"]').value.trim();
+    const password = form.querySelector('input[name="password"]').value.trim();
 
-        try {
-            const { res, data } = await apiRequest('/auth/login', {
-                method: 'POST',
-                body: { email, password }
-            });
-
-            if (!res.ok) {
-                console.error('Login failed:', data && data.error);
-                showToast(data && data.error ? data.error : 'Login failed.', 'error');
-                return;
-            }
-
-            showToast('Welcome back!', 'success');
-            setTimeout(() => window.location.href = 'home.html', 600);
-        } catch (err) {
-            console.error('Login request failed:', err);
-            showToast('Network error logging in.', 'error');
-        }
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password })
     });
+
+    if (res.ok) {
+      window.location.href = 'home.html';
+    } else {
+      showToast('Invalid email or password', 'error');
+    }
+  });
 }
+
 
 // REGISTER
 function initRegisterPage() {
