@@ -72,17 +72,20 @@ def create_app(config_name=None):
     app.register_blueprint(items_bp, url_prefix='/api')
     app.register_blueprint(ratings_bp, url_prefix='/api')
     
+    TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
     # Serve static files (HTML, CSS, JS)
     @app.route('/')
     def index():
-        return send_from_directory('.', 'index.html')
-    
+        return send_from_directory('templates', 'index.html')
+
     @app.route('/<path:path>')
     def serve_static(path):
-        """Serve static files"""
-        if os.path.exists(path):
-            return send_from_directory('.', path)
-        return send_from_directory('.', 'index.html')
+        """Serve static files from templates/ as a simple SPA"""
+        full_path = os.path.join('templates', path)
+        if os.path.exists(full_path):
+            return send_from_directory('templates', path)
+        # Fallback to index.html so refreshing on any page still works
+        return send_from_directory('templates', 'index.html')
     
     # API root route
     @app.route('/api')
