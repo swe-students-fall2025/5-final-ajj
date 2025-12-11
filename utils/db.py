@@ -4,7 +4,6 @@ MongoDB connection with safe initialization and proper logging
 
 import os
 import logging
-import certifi
 from pymongo import MongoClient, ASCENDING, DESCENDING, TEXT
 from pymongo.errors import ConnectionFailure, OperationFailure
 from dotenv import load_dotenv
@@ -59,10 +58,16 @@ try:
     logger.info("Connected to MongoDB successfully.")
     
     # --- Select database ---
-    db_name = "ranking_app"
-    if "test" in MONGO_URI:
+    # Hardcoded database names for different environments
+    if "test" in MONGO_URI.lower():
         db_name = "test_ranking_app"
+    elif "localhost" in MONGO_URI or "127.0.0.1" in MONGO_URI:
+        db_name = "ranking_app"
+    else:
+        # Production (Digital Ocean)
+        db_name = "rankit-db"
     
+    logger.info(f"Using database: {db_name}")
     db = client[db_name]
     
     # Collections
@@ -70,6 +75,8 @@ try:
     groups_collection = db.groups
     items_collection = db.items
     ratings_collection = db.ratings
+    
+    logger.info(f"✓ Database '{db_name}' initialized")
     
 except ConnectionFailure as e:
     logger.error(f"Failed to connect to MongoDB during import: {e}")
@@ -149,6 +156,7 @@ def drop_database():
     if client is None or db is None:
         raise ConnectionFailure("Cannot drop database - MongoDB client not connected")
     
+    db_name = db.name
     client.drop_database(db_name)
     logger.warning(f"Database '{db_name}' dropped")
 
