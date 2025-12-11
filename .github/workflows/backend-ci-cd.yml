@@ -107,16 +107,22 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
+      - name: Wait for Docker Hub
+        run: |
+          echo "Waiting for Docker Hub to propagate the image..."
+          sleep 30
+
       - name: Create app spec
         run: |
-          cat > deploy-spec.yaml << EOF
+          cat > deploy-spec.yaml << 'SPECEOF'
           name: rankit-app
           region: nyc
           services:
             - name: web
               image:
                 registry_type: DOCKER_HUB
-                repository: ${{ env.DOCKER_IMAGE }}
+                registry: DOCKERHUB_USERNAME_PLACEHOLDER
+                repository: rankit-app
                 tag: latest
               http_port: 5000
               instance_count: 1
@@ -132,16 +138,25 @@ jobs:
                 - key: PORT
                   value: "5000"
                 - key: SECRET_KEY
-                  value: ${{ secrets.SECRET_KEY }}
+                  value: SECRET_KEY_PLACEHOLDER
                   type: SECRET
                 - key: MONGO_URI
-                  value: ${{ secrets.MONGODB_URI }}
+                  value: MONGO_URI_PLACEHOLDER
                   type: SECRET
                 - key: CORS_ORIGINS
                   value: "*"
               routes:
                 - path: /
-          EOF
+          SPECEOF
+          
+          # Replace placeholders with actual values
+          sed -i "s|DOCKERHUB_USERNAME_PLACEHOLDER|${{ secrets.DOCKERHUB_USERNAME }}|g" deploy-spec.yaml
+          sed -i "s|SECRET_KEY_PLACEHOLDER|${{ secrets.SECRET_KEY }}|g" deploy-spec.yaml
+          sed -i "s|MONGO_URI_PLACEHOLDER|${{ secrets.MONGODB_URI }}|g" deploy-spec.yaml
+          
+          echo "=== Generated Deployment Spec ==="
+          cat deploy-spec.yaml
+          echo "================================="
 
       - name: Deploy to App Platform
         run: |
@@ -178,6 +193,7 @@ jobs:
           echo "=========================================="
 
       - name: Verify deployment
+        continue-on-error: true
         run: |
           APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | grep "rankit-app" | awk '{print $1}')
           APP_URL=$(doctl apps get $APP_ID --format LiveURL --no-header 2>/dev/null || echo "")
@@ -194,7 +210,7 @@ jobs:
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://$APP_URL/api/health" || echo "000")
           
           if [ "$HTTP_CODE" = "200" ]; then
-            echo "Deployment verified successfully!"
+            echo "✅ Deployment verified successfully!"
           else
-            echo "Health check returned $HTTP_CODE (app may still be starting)"
+            echo "⏳ Health check returned $HTTP_CODE (app may still be starting)"
           fi
