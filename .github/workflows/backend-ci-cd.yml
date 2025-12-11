@@ -2,9 +2,9 @@ name: RankIt CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
   pull_request:
-    branches: [ main, master ]
+    branches:
 
 env:
   DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/rankit-app
