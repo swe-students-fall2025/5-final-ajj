@@ -5,29 +5,6 @@ The platform helps teams, friends, clubs, and communities create consensus-drive
 
 ---
 
-## 🚦 CI/CD Status
-
-> **TODO:** Insert GitHub Actions workflow badges here once created.  
-> Example placeholders:  
-> ![Backend CI](https://github.com/your/repo/actions/workflows/backend.yml/badge.svg)  
-> ![Database CI](https://github.com/your/repo/actions/workflows/database.yml/badge.svg)
-
----
-
-## 📦 Subsystem Container Images
-
-RankIt is composed of **two custom, containerized subsystems**, each with its own Dockerfile and CI/CD pipeline:
-
-- **Backend (Python / Flask)**  
-  Docker Hub Image: **TODO – insert link**
-
-- **Database (MongoDB)**  
-  Docker Hub Image: **TODO – insert link**
-
-Each subsystem builds, tests, and deploys independently through GitHub Actions workflows.
-
----
-
 # 📖 Project Overview
 
 RankIt enables groups of users to collaboratively determine the best ordering of a set of items. Typical use cases include:
