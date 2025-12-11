@@ -46,7 +46,7 @@ Deployment is handled through CI/CD pipelines using GitHub Actions and DigitalOc
 
 The official, production-ready Docker image is available on Docker Hub:
 
-👉 **Docker Hub Image:** [rankit-app image](https://hub.docker.com/r/asimd0/rankit-app)
+👉 **Docker Hub Image:** [rankit-app image](https://hub.docker.com/r/asimd0/rankit-app) <br>
 👉 **Image Name:** `asimd0/rankit-app`
 
 You may use this directly in DigitalOcean, Docker Compose, or any container platform.
