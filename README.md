@@ -55,7 +55,6 @@ You may use this directly in DigitalOcean, Docker Compose, or any container plat
 
 # 👥 Team Members
 
-> **TODO: Fill in names + GitHub links**
 - Jeffrey Chen — https://github.com/jzc719  
 - Asim Dulgeroglu — https://github.com/ad6943  
 - Jordan Lee — https://github.com/jjl9930  
