@@ -1,10 +1,9 @@
 """
-MongoDB connection with proper logging
+MongoDB connection with safe initialization and proper logging
 """
 
 import os
 import logging
-import certifi
 from pymongo import MongoClient, ASCENDING, DESCENDING, TEXT
 from pymongo.errors import ConnectionFailure, OperationFailure
 from dotenv import load_dotenv
@@ -31,7 +30,14 @@ else:
     # Avoid logging full credentials
     logger.info("MONGO_URI loaded from environment.")
 
-# --- Initialize MongoDB client ---
+# --- Initialize MongoDB client with error handling ---
+client = None
+db = None
+users_collection = None
+groups_collection = None
+items_collection = None
+ratings_collection = None
+
 try:
     logger.info("Connecting to MongoDB...")
     
@@ -46,28 +52,49 @@ try:
         client_options['tlsAllowInvalidCertificates'] = False
     
     client = MongoClient(MONGO_URI, **client_options)
+    
+    # Test connection - but DON'T fail module import if it fails
     client.admin.command("ping")
     logger.info("Connected to MongoDB successfully.")
+    
+    # --- Select database ---
+    # Hardcoded database names for different environments
+    if "test" in MONGO_URI.lower():
+        db_name = "test_ranking_app"
+    elif "localhost" in MONGO_URI or "127.0.0.1" in MONGO_URI:
+        db_name = "ranking_app"
+    else:
+        # Production (Digital Ocean)
+        db_name = "rankit-db"
+    
+    logger.info(f"Using database: {db_name}")
+    db = client[db_name]
+    
+    # Collections
+    users_collection = db.users
+    groups_collection = db.groups
+    items_collection = db.items
+    ratings_collection = db.ratings
+    
+    logger.info(f"✓ Database '{db_name}' initialized")
+    
 except ConnectionFailure as e:
-    logger.error(f"Failed to connect to MongoDB: {e}")
-    raise
-
-# --- Select database ---
-db_name = "ranking_app"
-if "test" in MONGO_URI:
-    db_name = "test_ranking_app"
-
-db = client[db_name]
-
-# Collections
-users_collection = db.users
-groups_collection = db.groups
-items_collection = db.items
-ratings_collection = db.ratings
+    logger.error(f"Failed to connect to MongoDB during import: {e}")
+    logger.error("Application will start but database operations will fail.")
+    logger.error("Make sure MONGO_URI is set correctly in your environment variables.")
+    # DON'T raise - let the module import succeed
+    # The health check and init_db will catch this later
+except Exception as e:
+    logger.error(f"Unexpected error connecting to MongoDB: {e}")
+    logger.error("Application will start but database operations will fail.")
+    # DON'T raise - let the module import succeed
 
 
 def init_db():
     """Initialize database indexes"""
+    if client is None or db is None:
+        raise ConnectionFailure("Cannot initialize database - MongoDB client not connected. Check MONGO_URI environment variable.")
+    
     try:
         logger.info("Initializing database indexes...")
 
@@ -112,6 +139,9 @@ def init_db():
 
 def get_db_stats():
     """Get database statistics"""
+    if client is None or db is None:
+        raise ConnectionFailure("Cannot get stats - MongoDB client not connected")
+    
     stats = {
         "users": users_collection.count_documents({}),
         "groups": groups_collection.count_documents({}),
@@ -123,12 +153,19 @@ def get_db_stats():
 
 def drop_database():
     """Drop entire database - USE WITH CAUTION"""
+    if client is None or db is None:
+        raise ConnectionFailure("Cannot drop database - MongoDB client not connected")
+    
+    db_name = db.name
     client.drop_database(db_name)
     logger.warning(f"Database '{db_name}' dropped")
 
 
 def seed_sample_data():
     """Seed database with sample data"""
+    if client is None or db is None:
+        raise ConnectionFailure("Cannot seed data - MongoDB client not connected")
+    
     from datetime import datetime
     from bson import ObjectId
     import bcrypt
