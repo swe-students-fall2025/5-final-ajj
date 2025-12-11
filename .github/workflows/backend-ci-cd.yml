@@ -117,7 +117,7 @@ jobs:
               image:
                 registry_type: DOCKER_HUB
                 repository: ${{ env.DOCKER_IMAGE }}
-                tag: latest
+                tag: main
               http_port: 5000
               instance_count: 1
               instance_size_slug: basic-xxs
