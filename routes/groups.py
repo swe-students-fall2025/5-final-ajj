@@ -135,7 +135,35 @@ def get_my_groups():
         print(f"Get my groups error: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
-
+@groups_bp.route('/groups/<group_id>/members/<user_id>', methods=['DELETE'])
+@login_required
+def kick_member(group_id, user_id):
+    """
+    Kick a member from the group (Admin only)
+    
+    Request: DELETE /api/groups/:id/members/:user_id
+    """
+    try:
+        # Check if requester is admin
+        if not Group.is_admin(group_id, current_user.id):
+            return jsonify({'error': 'Only group admins can kick members'}), 403
+        
+        # Kick the member
+        Group.kick_member(group_id, user_id, current_user.id)
+        
+        # Update user's groups list
+        from models.user import User
+        user = User.find_by_id(user_id)
+        if user:
+            user.update_groups(group_id, 'remove')
+        
+        return jsonify({'message': 'Member kicked successfully'}), 200
+        
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 403
+    except Exception as e:
+        print(f"Kick member error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
 # 🔥🔥🔥 FIXED: Edit item (Creator Only)
 @groups_bp.route("/groups/<group_id>/items/<item_id>", methods=["PUT"])
 @login_required

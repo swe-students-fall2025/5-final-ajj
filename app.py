@@ -32,7 +32,8 @@ def create_app(config_name=None):
     Returns:
         Flask: Configured Flask application
     """
-    app = Flask(__name__, static_folder='static', static_url_path='')
+    app = Flask(__name__, template_folder='templates',
+                          static_folder='static')
     
     # Load configuration
     if config_name is None:

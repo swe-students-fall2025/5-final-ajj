@@ -478,7 +478,26 @@ async function joinGroup(groupId) {
 
     alert(error);
 }
+/****************************************************
+ * KICK MEMBER FROM GROUP
+ ****************************************************/
+async function kickMember(groupId, userId, username) {
+    if (!confirm(`Remove ${username} from this group?`)) return;
 
+    const res = await fetch(`/api/groups/${groupId}/members/${userId}`, {
+        method: "DELETE",
+        credentials: "include"
+    });
+
+    if (res.ok) {
+        alert("Member removed successfully");
+        // Reload members list if you have one
+        loadGroupMembers(groupId);
+    } else {
+        const data = await res.json();
+        alert(data?.error || "Failed to remove member");
+    }
+}
 
 
 /****************************************************
