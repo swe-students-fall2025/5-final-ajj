@@ -46,7 +46,7 @@ Deployment is handled through CI/CD pipelines using GitHub Actions and DigitalOc
 
 The official, production-ready Docker image is available on Docker Hub:
 
-👉 **Docker Hub Image:** https://hub.docker.com/r/asimd0/rankit-app  
+👉 **Docker Hub Image:** [rankit-app image](https://hub.docker.com/r/asimd0/rankit-app)
 👉 **Image Name:** `asimd0/rankit-app`
 
 You may use this directly in DigitalOcean, Docker Compose, or any container platform.
@@ -55,9 +55,9 @@ You may use this directly in DigitalOcean, Docker Compose, or any container plat
 
 # 👥 Team Members
 
-- Jeffrey Chen — https://github.com/jzc719  
-- Asim Dulgeroglu — https://github.com/ad6943  
-- Jordan Lee — https://github.com/jjl9930  
+- Jeffrey Chen — [Jeffrey's Github](https://github.com/jzc719)  
+- Asim Dulgeroglu — [Asim's Github](https://github.com/ad6943)  
+- Jordan Lee — [Jordan's Github](https://github.com/jjl9930)  
 
 ---
 
