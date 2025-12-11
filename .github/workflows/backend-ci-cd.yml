@@ -13,7 +13,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    
+
     services:
       mongodb:
         image: mongo:7.0
@@ -24,7 +24,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,20 +72,32 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: |
-            ${{ env.DOCKER_IMAGE }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
 
   deploy:
     name: Deploy to Digital Ocean App Platform
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -115,6 +127,7 @@ jobs:
               http_port: 5000
               instance_count: 1
               instance_size_slug: basic-xxs
+              run_command: python app.py
               health_check:
                 http_path: /api/health
                 initial_delay_seconds: 60
@@ -136,12 +149,12 @@ jobs:
               routes:
                 - path: /
           SPECEOF
-          
+
           # Replace placeholders with actual values
           sed -i "s|DOCKERHUB_USERNAME_PLACEHOLDER|${{ secrets.DOCKERHUB_USERNAME }}|g" deploy-spec.yaml
           sed -i "s|SECRET_KEY_PLACEHOLDER|${{ secrets.SECRET_KEY }}|g" deploy-spec.yaml
           sed -i "s|MONGO_URI_PLACEHOLDER|${{ secrets.MONGODB_URI }}|g" deploy-spec.yaml
-          
+
           echo "=== Generated Deployment Spec ==="
           cat deploy-spec.yaml
           echo "================================="
@@ -150,12 +163,12 @@ jobs:
         run: |
           # Check if app exists
           APP_LIST=$(doctl apps list --format ID,Spec.Name --no-header 2>/dev/null || echo "")
-          
+
           if echo "$APP_LIST" | grep -q "rankit-app"; then
             # Update existing app
             APP_ID=$(echo "$APP_LIST" | grep "rankit-app" | awk '{print $1}')
             echo "Updating existing app: $APP_ID"
-            doctl apps update $APP_ID --spec deploy-spec.yaml
+            doctl apps update "$APP_ID" --spec deploy-spec.yaml
           else
             # Create new app
             echo "Creating new app"
@@ -170,8 +183,8 @@ jobs:
       - name: Get deployment info
         run: |
           APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | grep "rankit-app" | awk '{print $1}')
-          APP_URL=$(doctl apps get $APP_ID --format LiveURL --no-header 2>/dev/null || echo "pending")
-          
+          APP_URL=$(doctl apps get "$APP_ID" --format LiveURL --no-header 2>/dev/null || echo "pending")
+
           echo "=========================================="
           echo "🚀 Deployment Complete!"
           echo "=========================================="
@@ -184,19 +197,19 @@ jobs:
         continue-on-error: true
         run: |
           APP_ID=$(doctl apps list --format ID,Spec.Name --no-header | grep "rankit-app" | awk '{print $1}')
-          APP_URL=$(doctl apps get $APP_ID --format LiveURL --no-header 2>/dev/null || echo "")
-          
+          APP_URL=$(doctl apps get "$APP_ID" --format LiveURL --no-header 2>/dev/null || echo "")
+
           if [ -z "$APP_URL" ]; then
             echo "App URL not ready yet. Check Digital Ocean dashboard."
             exit 0
           fi
-          
+
           # Wait for app to be ready
           sleep 30
-          
+
           # Try health check
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://$APP_URL/api/health" || echo "000")
-          
+
           if [ "$HTTP_CODE" = "200" ]; then
             echo "✅ Deployment verified successfully!"
           else
