@@ -204,8 +204,3 @@ PORT=5000
 
 ---
 
-# ✅ Notes
-
-- Replace TODO sections before publishing  
-- Add deployment specifics once finalized  
-
