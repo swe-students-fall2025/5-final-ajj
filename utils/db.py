@@ -34,11 +34,18 @@ else:
 # --- Initialize MongoDB client ---
 try:
     logger.info("Connecting to MongoDB...")
-    client = MongoClient(
-        MONGO_URI,
-        serverSelectionTimeoutMS=5000,
-        #tlsCAFile=certifi.where(),  # 👈 use certifi's CA bundle
-    )
+    
+    # Connection options for production
+    client_options = {
+        'serverSelectionTimeoutMS': 5000,
+    }
+    
+    # Add TLS if connection string includes it (Digital Ocean requires this)
+    if 'tls=true' in MONGO_URI.lower() or 'ssl=true' in MONGO_URI.lower():
+        client_options['tls'] = True
+        client_options['tlsAllowInvalidCertificates'] = False
+    
+    client = MongoClient(MONGO_URI, **client_options)
     client.admin.command("ping")
     logger.info("Connected to MongoDB successfully.")
 except ConnectionFailure as e:
