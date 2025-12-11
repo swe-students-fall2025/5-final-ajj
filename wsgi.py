@@ -1,8 +1,8 @@
-import os
-from app import create_app
+"""
+WSGI entrypoint for Gunicorn.
 
-# Choose config based on FLASK_ENV, default to "production"
-config_name = os.getenv("FLASK_ENV", "production")
+Gunicorn is started with: `gunicorn wsgi:app`
+so this file *must* expose a module-level variable named `app`.
+"""
 
-# This is the object Gunicorn looks for when you run `gunicorn wsgi:app`
-app = create_app(config_name)
+from app import app  # imports the global `app` created at the bottom of app.py
