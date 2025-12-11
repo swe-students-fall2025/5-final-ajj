@@ -121,7 +121,7 @@ jobs:
             - name: web
               image:
                 registry_type: DOCKER_HUB
-                repository: rankit-app
+                repository: DOCKER_IMAGE_PLACEHOLDER
                 tag: latest
               http_port: 5000
               instance_count: 1
