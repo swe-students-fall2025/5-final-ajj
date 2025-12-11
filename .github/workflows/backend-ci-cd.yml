@@ -121,7 +121,8 @@ jobs:
             - name: web
               image:
                 registry_type: DOCKER_HUB
-                repository: DOCKER_IMAGE_PLACEHOLDER
+                registry: DOCKERHUB_USERNAME_PLACEHOLDER
+                repository: rankit-app
                 tag: latest
               http_port: 5000
               instance_count: 1
@@ -149,7 +150,7 @@ jobs:
           SPECEOF
           
           # Replace placeholders with actual values
-          sed -i "s|DOCKER_IMAGE_PLACEHOLDER|${{ env.DOCKER_IMAGE }}|g" deploy-spec.yaml
+          sed -i "s|DOCKERHUB_USERNAME_PLACEHOLDER|${{ secrets.DOCKERHUB_USERNAME }}|g" deploy-spec.yaml
           sed -i "s|SECRET_KEY_PLACEHOLDER|${{ secrets.SECRET_KEY }}|g" deploy-spec.yaml
           sed -i "s|MONGO_URI_PLACEHOLDER|${{ secrets.MONGODB_URI }}|g" deploy-spec.yaml
           
